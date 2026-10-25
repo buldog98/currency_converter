@@ -4,7 +4,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from currency_converter import config
-from currency_converter.exceptions import ConversionError, ValidationError
+from currency_converter.exceptions import ConversionError, NetworkError, ValidationError
 
 
 class CurrencyConverter:
@@ -33,31 +33,36 @@ class CurrencyConverter:
         Returns:
             Словарь с результатом конвертации:
             {
-                "amount": float,          # Исходная сумма
-                "from_currency": str,     # Код исходной валюты
-                "to_currency": str,       # Код целевой валюты
-                "rate": float,            # Курс обмена
-                "result": float,          # Результат конвертации
+                "amount": float,       # Исходная сумма
+                "from_currency": str,  # Код исходной валюты
+                "to_currency": str,    # Код целевой валюты
+                "rate": float,         # Курс обмена
+                "result": float,       # Результат конвертации
             }
 
         Raises:
-            ValidationError: Если сумма <= 0 или код валюты не в списке
-                VALID_CURRENCIES.
-            ConversionError: Если произошла ошибка при получении курса
-                или математической конвертации.
+            ValidationError: Если сумма <= 0 или код валюты не в списке VALID_CURRENCIES.
+            ConversionError: Если произошла ошибка при получении курса или математической конвертации.
+            NetworkError: Если произошла сетевая ошибка при запросе к API.
         """
         # Fail-Fast: валидация до запроса к API
         self._validate_amount(amount)
         self._validate_currency(from_currency, "Исходная")
         self._validate_currency(to_currency, "Целевая")
 
-        # Получение курса через клиент (Data Access Layer)
-        try:
-            rate = self.client.get_exchange_rate(from_currency, to_currency)
-        except Exception as exc:
-            raise ConversionError(
-                f"Не удалось получить курс {from_currency} -> {to_currency}: {exc}"
-            ) from exc
+        # Оптимизация: если валюты совпадают, курс = 1.0
+        if from_currency == to_currency:
+            rate = 1.0
+        else:
+            # Получение курса через клиент (Data Access Layer)
+            try:
+                rate = self.client.get_exchange_rate(from_currency, to_currency)
+            except NetworkError:
+                raise
+            except Exception as exc:
+                raise ConversionError(
+                    f"Не удалось получить курс {from_currency} -> {to_currency}: {exc}"
+                ) from exc
 
         # Математическая конвертация через Decimal
         try:
@@ -86,7 +91,7 @@ class CurrencyConverter:
         """Проверяет, что код валюты есть в списке поддерживаемых."""
         if currency not in config.VALID_CURRENCIES:
             raise ValidationError(
-                f"{label} валюта '{currency}' не поддерживается. "
+                f"Неизвестный код валюты: {currency}. "
                 f"Доступные: {', '.join(config.VALID_CURRENCIES)}"
             )
 
