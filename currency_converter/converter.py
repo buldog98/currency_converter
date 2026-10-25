@@ -1,4 +1,5 @@
 """Бизнес-логика конвертации валют."""
+
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 

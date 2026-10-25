@@ -1,4 +1,5 @@
 """HTTP-клиент для взаимодействия с ExchangeRate-API."""
+
 from typing import Any
 
 import requests
@@ -25,9 +26,7 @@ class ExchangeRateClient:
         self.base_url = base_url.replace("/{base_currency}", "")
         self.timeout = timeout
 
-    def get_exchange_rate(
-        self, base_currency: str, target_currency: str
-    ) -> float:
+    def get_exchange_rate(self, base_currency: str, target_currency: str) -> float:
         """Получает курс целевой валюты относительно базовой.
 
         Args:
@@ -47,9 +46,7 @@ class ExchangeRateClient:
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
         except ConnectionError as exc:
-            raise NetworkError(
-                f"Не удалось подключиться к API: {exc}"
-            ) from exc
+            raise NetworkError(f"Не удалось подключиться к API: {exc}") from exc
         except Timeout as exc:
             raise NetworkError(
                 f"Превышен таймаут запроса ({self.timeout} сек): {exc}"

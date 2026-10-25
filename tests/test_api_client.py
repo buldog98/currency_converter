@@ -1,4 +1,5 @@
 """Unit-тесты для модуля API-клиента (api_client.py)."""
+
 import pytest
 import requests
 import requests_mock as rm

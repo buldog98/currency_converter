@@ -1,4 +1,5 @@
 """Точка входа в приложение Currency Converter."""
+
 import sys
 from typing import Any
 

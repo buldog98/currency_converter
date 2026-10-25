@@ -1,4 +1,5 @@
 """Unit-тесты для модуля бизнес-логики (converter.py)."""
+
 from unittest.mock import MagicMock
 
 import pytest
