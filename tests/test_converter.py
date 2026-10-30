@@ -59,4 +59,3 @@ class TestCurrencyConverter:
         mock_client.get_rates.return_value = {"USD": Decimal("1.0")}
         with pytest.raises(ConversionError):
             converter.convert(100.0, "USD", "RUB")
-

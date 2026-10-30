@@ -80,5 +80,3 @@ class TestExchangeRateClient:
             )
             with pytest.raises(RateLimitError):
                 client.get_rates("USD")
-
-
